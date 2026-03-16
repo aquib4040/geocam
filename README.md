@@ -103,11 +103,26 @@ GeoStamp Camera supports **both free and paid** data providers. You can choose y
 
 ### Map Providers
 
-| Provider | Cost | API Key Required | Notes |
-|----------|------|------------------|-------|
-| **OpenStreetMap** (default) | Free | No | Uses OSM tile servers. No setup needed. |
-| **Google Maps Static API** | Free tier: $200/month credit (~28k requests) | Yes | Enter your own key in Settings. Get one at [Google Cloud Console](https://console.cloud.google.com). |
-| **MapmyIndia / Mappls** | Free tier available | Yes | Indian map provider with detailed India coverage. Get a key at [mappls.com](https://www.mappls.com). |
+| Provider | Cost | API Key Required | Specific API to Enable |
+|----------|------|------------------|-----------------------|
+| **OpenStreetMap** (default) | Free | No | None |
+| **Google Maps** | Free tier: $200/month credit | Yes | **Maps Static API** |
+| **MapmyIndia / Mappls** | Free tier available | Yes | **Still Image API** |
+
+#### Which APIs to Enable?
+
+When you go to the developer consoles, you will see many options. **Enable ONLY these** to avoid unnecessary costs and confusion:
+
+**1. Google Cloud Console:**
+- Search for "Maps Static API" and enable it.
+- (Optional but recommended) Enable "Maps SDK for Android".
+
+**2. Mappls (MapmyIndia) Console:**
+- Search for "Still Image API" or find it under "Raster API" section.
+- This is required for the static snapshots shown on the stamp.
+
+**3. OpenWeather Console:**
+- Use the **"Current Weather Data"** API.
 
 #### Project Metadata (Required for API Registration)
 
