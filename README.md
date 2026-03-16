@@ -109,6 +109,13 @@ GeoStamp Camera supports **both free and paid** data providers. You can choose y
 | **Google Maps Static API** | Free tier: $200/month credit (~28k requests) | Yes | Enter your own key in Settings. Get one at [Google Cloud Console](https://console.cloud.google.com). |
 | **MapmyIndia / Mappls** | Free tier available | Yes | Indian map provider with detailed India coverage. Get a key at [mappls.com](https://www.mappls.com). |
 
+#### Project Metadata (Required for API Registration)
+
+When registering for Google Maps or Mappls APIs, use these credentials:
+
+- **Package Name:** `com.geostampcamera`
+- **SHA-256 Fingerprint:** `BA:46:C8:D8:1A:AF:1C:71:81:12:33:62:8C:ED:D2:EF:04:7D:51:6B:38:ED:5B:4A:2A:94:0D:51:9C:D9:65:DC`
+
 #### How to get a MapmyIndia / Mappls API Key
 
 1. Go to [Mappls API Dashboard](https://apis.mappls.com/console/)
