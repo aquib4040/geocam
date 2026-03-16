@@ -49,6 +49,26 @@ class TemplateEngine @Inject constructor() {
                 mapAlignment = MapAlignment.LEFT,
                 textAlignment = StampTextAlignment.RIGHT
             )
+            StampTemplate.ELEGANT -> TemplateConfig(
+                position = StampPosition.TOP,
+                mapAlignment = MapAlignment.RIGHT,
+                textAlignment = StampTextAlignment.LEFT
+            )
+            StampTemplate.DATA_OVERLAY -> TemplateConfig(
+                position = StampPosition.BOTTOM,
+                mapAlignment = MapAlignment.CENTER,
+                textAlignment = StampTextAlignment.LEFT
+            )
+            StampTemplate.SIDEBAR -> TemplateConfig(
+                position = StampPosition.BOTTOM, // Will be handled by renderer as a side layout if needed
+                mapAlignment = MapAlignment.LEFT,
+                textAlignment = StampTextAlignment.LEFT
+            )
+            StampTemplate.COMPACT -> TemplateConfig(
+                position = StampPosition.BOTTOM,
+                mapAlignment = MapAlignment.RIGHT,
+                textAlignment = StampTextAlignment.RIGHT
+            )
         }
     }
 }

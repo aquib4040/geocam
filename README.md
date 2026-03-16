@@ -99,7 +99,7 @@ Built with modern Android development practices. No ads. No tracking. Fully open
 
 ## API Providers
 
-GeoStamp Camera supports **both free and paid** data providers. Users choose their preferred provider in Settings.
+GeoStamp Camera supports **both free and paid** data providers. You can choose your preferred provider in **Settings → Map Settings** and **Settings → Weather Settings**.
 
 ### Map Providers
 
@@ -107,6 +107,16 @@ GeoStamp Camera supports **both free and paid** data providers. Users choose the
 |----------|------|------------------|-------|
 | **OpenStreetMap** (default) | Free | No | Uses OSM tile servers. No setup needed. |
 | **Google Maps Static API** | Free tier: $200/month credit (~28k requests) | Yes | Enter your own key in Settings. Get one at [Google Cloud Console](https://console.cloud.google.com). |
+| **MapmyIndia / Mappls** | Free tier available | Yes | Indian map provider with detailed India coverage. Get a key at [mappls.com](https://www.mappls.com). |
+
+#### How to get a MapmyIndia / Mappls API Key
+
+1. Go to [Mappls API Dashboard](https://apis.mappls.com/console/)
+2. Create a free account
+3. Create a new project and generate a **REST API Key**
+4. Copy the key and paste it in **Settings → API Keys → MapmyIndia / Mappls API Key**
+5. Tap **Test Key** to verify it works
+6. Select **MapmyIndia / Mappls** as your Map Provider in Settings
 
 ### Weather Providers
 
@@ -114,6 +124,10 @@ GeoStamp Camera supports **both free and paid** data providers. Users choose the
 |----------|------|------------------|-------|
 | **Open-Meteo** (default) | Free | No | No account needed. Supports current weather worldwide. |
 | **OpenWeather** | Free tier: 1,000 calls/day | Yes | Enter your own key in Settings. Sign up at [openweathermap.org](https://openweathermap.org/api). |
+
+### Automatic Fallback
+
+If a paid API key is invalid, expired, or hits its rate limit, the app **automatically falls back** to the free provider (OpenStreetMap / Open-Meteo) so your photos are never affected. A popup will notify you when this happens.
 
 > The app works immediately out of the box with the free providers. No API keys or accounts needed.
 

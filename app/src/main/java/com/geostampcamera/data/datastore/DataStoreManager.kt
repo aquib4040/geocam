@@ -59,6 +59,7 @@ class DataStoreManager @Inject constructor(
             mapType = enumByOrdinal(prefs[Keys.MAP_TYPE], MapType.NORMAL),
             mapSize = enumByOrdinal(prefs[Keys.MAP_SIZE], MapSize.MEDIUM),
             googleMapsApiKey = prefs[Keys.GOOGLE_MAPS_API_KEY] ?: "",
+            mapplsApiKey = prefs[Keys.MAPPLS_API_KEY] ?: "",
             fontSize = enumByOrdinal(prefs[Keys.FONT_SIZE], FontSize.MEDIUM),
             fontColor = enumByOrdinal(prefs[Keys.FONT_COLOR], StampFontColor.WHITE),
             textAlignment = enumByOrdinal(prefs[Keys.TEXT_ALIGNMENT], StampTextAlignment.LEFT),
@@ -131,6 +132,7 @@ class DataStoreManager @Inject constructor(
         val MAP_TYPE = intPreferencesKey("map_type")
         val MAP_SIZE = intPreferencesKey("map_size")
         val GOOGLE_MAPS_API_KEY = stringPreferencesKey("google_maps_api_key")
+        val MAPPLS_API_KEY = stringPreferencesKey("mappls_api_key")
         val FONT_SIZE = intPreferencesKey("font_size")
         val FONT_COLOR = intPreferencesKey("font_color")
         val TEXT_ALIGNMENT = intPreferencesKey("text_alignment")

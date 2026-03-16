@@ -1,8 +1,11 @@
 package com.geostampcamera.ui.camera
 
-import android.Manifest
+import android.app.Activity
+import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
@@ -29,6 +32,8 @@ import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.GridOff
+import androidx.compose.material.icons.filled.LocationOff
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Style
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,6 +44,7 @@ import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,7 +56,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,8 +64,16 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geostampcamera.core.permissions.PermissionHelper
+import com.geostampcamera.ui.preview.PhotoPreviewScreen
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.Priority
 
 @Composable
 fun CameraScreen(
@@ -95,10 +109,75 @@ fun CameraScreen(
         }
     }
 
-    // Navigate to preview when photo is taken
+    // Navigation logic handled by UI overlay now for preview
     LaunchedEffect(uiState.lastPhotoPath) {
-        uiState.lastPhotoPath?.let { path ->
-            onPhotoTaken(path)
+        if (uiState.lastPhotoPath != null && uiState.lastPhotoPath != "live_preview") {
+            // This would be for gallery mode if implemented later
+        }
+    }
+
+    // GPS status tracking
+    var isGpsEnabled by remember { mutableStateOf(false) }
+
+    // Check GPS state helper
+    fun checkGpsState(): Boolean {
+        val locationManager = context.getSystemService(android.content.Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
+
+    // Re-check GPS when app resumes
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isGpsEnabled = checkGpsState()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // GPS enable request launcher
+    val gpsEnableLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        isGpsEnabled = result.resultCode == Activity.RESULT_OK
+    }
+
+    // Prompt user to enable GPS
+    fun promptEnableGps() {
+        val locationRequest = LocationRequest.Builder(
+            Priority.PRIORITY_HIGH_ACCURACY, 10000L
+        ).build()
+
+        val settingsRequest = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+            .setAlwaysShow(true)
+            .build()
+
+        val settingsClient = LocationServices.getSettingsClient(context)
+        settingsClient.checkLocationSettings(settingsRequest)
+            .addOnSuccessListener {
+                isGpsEnabled = true
+            }
+            .addOnFailureListener { exception ->
+                if (exception is ResolvableApiException) {
+                    try {
+                        val intentSenderRequest = IntentSenderRequest.Builder(
+                            exception.resolution.intentSender
+                        ).build()
+                        gpsEnableLauncher.launch(intentSenderRequest)
+                    } catch (_: IntentSender.SendIntentException) {}
+                }
+            }
+    }
+
+    // Check GPS on first launch
+    LaunchedEffect(permissionsGranted) {
+        if (permissionsGranted) {
+            isGpsEnabled = checkGpsState()
+            if (!isGpsEnabled) {
+                promptEnableGps()
+            }
         }
     }
 
@@ -111,13 +190,17 @@ fun CameraScreen(
     val previewView = remember { PreviewView(context) }
 
     LaunchedEffect(uiState.lensFacing, settings.aspectRatio) {
-        viewModel.cameraManagerInstance.startCamera(
-            previewView = previewView,
-            lifecycleOwner = lifecycleOwner,
-            lensFacing = uiState.lensFacing,
-            flashEnabled = settings.flashEnabled,
-            aspectRatio = settings.aspectRatio
-        )
+        try {
+            viewModel.cameraManagerInstance.startCamera(
+                previewView = previewView,
+                lifecycleOwner = lifecycleOwner,
+                lensFacing = uiState.lensFacing,
+                flashEnabled = settings.flashEnabled,
+                aspectRatio = settings.aspectRatio
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -156,7 +239,6 @@ fun CameraScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Flash toggle
             IconButton(onClick = { viewModel.toggleFlash() }) {
                 Icon(
                     imageVector = if (settings.flashEnabled) Icons.Filled.FlashOn
@@ -166,9 +248,8 @@ fun CameraScreen(
                 )
             }
 
-            // Compass indicator
             Text(
-                text = "${compass.direction} ${compass.degrees.toInt()}",
+                text = "${compass.direction} ${compass.degrees.toInt()}°",
                 color = Color.White,
                 fontSize = 14.sp,
                 modifier = Modifier
@@ -176,7 +257,17 @@ fun CameraScreen(
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             )
 
-            // Grid toggle
+            IconButton(onClick = {
+                if (!isGpsEnabled) promptEnableGps()
+            }) {
+                Icon(
+                    imageVector = if (isGpsEnabled) Icons.Filled.LocationOn
+                    else Icons.Filled.LocationOff,
+                    contentDescription = "GPS",
+                    tint = if (isGpsEnabled) Color(0xFF4CAF50) else Color(0xFFFF5252)
+                )
+            }
+
             IconButton(onClick = { viewModel.toggleGrid() }) {
                 Icon(
                     imageVector = if (settings.gridEnabled) Icons.Filled.GridOn
@@ -186,7 +277,6 @@ fun CameraScreen(
                 )
             }
 
-            // Settings button
             IconButton(onClick = onNavigateToSettings) {
                 Icon(
                     imageVector = Icons.Filled.Settings,
@@ -206,7 +296,6 @@ fun CameraScreen(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Template selector
             IconButton(
                 onClick = onNavigateToTemplates,
                 modifier = Modifier.size(48.dp)
@@ -219,7 +308,6 @@ fun CameraScreen(
                 )
             }
 
-            // Capture button
             Box(
                 modifier = Modifier
                     .size(72.dp)
@@ -246,7 +334,6 @@ fun CameraScreen(
                 }
             }
 
-            // Camera switch
             IconButton(
                 onClick = { viewModel.toggleCamera() },
                 modifier = Modifier.size(48.dp)
@@ -277,6 +364,18 @@ fun CameraScreen(
         }
     }
 
+    // Photo Preview Overlay
+    if (uiState.lastPhotoPath != null) {
+        PhotoPreviewScreen(
+            viewModel = viewModel,
+            onBack = { viewModel.discardPhoto() },
+            onDone = {
+                viewModel.savePhoto()
+                viewModel.exitPreview()
+            }
+        )
+    }
+
     // Rate limit popup dialog
     uiState.rateLimitMessage?.let { message ->
         AlertDialog(
@@ -304,12 +403,10 @@ private fun GridOverlay(modifier: Modifier = Modifier) {
         val strokeColor = Color.White.copy(alpha = 0.5f)
         val strokeWidth = 1f
 
-        // Vertical lines
         val thirdWidth = size.width / 3f
         drawLine(strokeColor, Offset(thirdWidth, 0f), Offset(thirdWidth, size.height), strokeWidth)
         drawLine(strokeColor, Offset(thirdWidth * 2, 0f), Offset(thirdWidth * 2, size.height), strokeWidth)
 
-        // Horizontal lines
         val thirdHeight = size.height / 3f
         drawLine(strokeColor, Offset(0f, thirdHeight), Offset(size.width, thirdHeight), strokeWidth)
         drawLine(strokeColor, Offset(0f, thirdHeight * 2), Offset(size.width, thirdHeight * 2), strokeWidth)

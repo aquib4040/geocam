@@ -174,6 +174,10 @@ private fun getTemplateDescription(template: StampTemplate): String = when (temp
     StampTemplate.SURVEY -> "Detailed data layout for site documentation"
     StampTemplate.TRAVEL -> "Top banner with centered map for travel photos"
     StampTemplate.PROFESSIONAL -> "Right-aligned text with left map for reports"
+    StampTemplate.ELEGANT -> "Sophisticated typography with centered map"
+    StampTemplate.DATA_OVERLAY -> "Semi-transparent overlay with full technical data"
+    StampTemplate.SIDEBAR -> "Vertical data column along the edge"
+    StampTemplate.COMPACT -> "Smallest footprint with key info"
 }
 
 // Preview text hint
@@ -184,4 +188,8 @@ private fun getTemplatePreviewText(template: StampTemplate): String = when (temp
     StampTemplate.SURVEY -> "All Fields | Map | Notes"
     StampTemplate.TRAVEL -> "Map | City | Weather | Date"
     StampTemplate.PROFESSIONAL -> "Full Data | Map | Report"
+    StampTemplate.ELEGANT -> "Location | Map | Date"
+    StampTemplate.DATA_OVERLAY -> "Overlaid Tech Data | Map"
+    StampTemplate.SIDEBAR -> "Sidebar Data | Map"
+    StampTemplate.COMPACT -> "Key Coords | Date"
 }

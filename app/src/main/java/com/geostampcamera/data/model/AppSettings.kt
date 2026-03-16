@@ -7,13 +7,18 @@ enum class StampTemplate(val displayName: String) {
     MINIMAL("Minimal"),
     SURVEY("Survey"),
     TRAVEL("Travel"),
-    PROFESSIONAL("Professional")
+    PROFESSIONAL("Professional"),
+    ELEGANT("Elegant"),
+    DATA_OVERLAY("Data Overlay"),
+    SIDEBAR("Sidebar"),
+    COMPACT("Compact")
 }
 
 // Map provider options
 enum class MapProvider(val displayName: String) {
     OPENSTREETMAP("OpenStreetMap (Free)"),
-    GOOGLE_MAPS("Google Maps (API Key Required)")
+    GOOGLE_MAPS("Google Maps (API Key)"),
+    MAPMYINDIA("MapmyIndia / Mappls (API Key)")
 }
 
 // Map display type
@@ -125,9 +130,10 @@ data class AppSettings(
 
     // Map
     val mapProvider: MapProvider = MapProvider.OPENSTREETMAP,
-    val mapType: MapType = MapType.NORMAL,
+    val mapType: MapType = MapType.SATELLITE,
     val mapSize: MapSize = MapSize.MEDIUM,
     val googleMapsApiKey: String = "",
+    val mapplsApiKey: String = "",
 
     // Text style
     val fontSize: FontSize = FontSize.MEDIUM,

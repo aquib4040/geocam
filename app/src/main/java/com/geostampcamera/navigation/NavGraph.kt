@@ -10,6 +10,8 @@ import com.geostampcamera.ui.camera.CameraScreen
 import com.geostampcamera.ui.preview.PhotoPreviewScreen
 import com.geostampcamera.ui.settings.SettingsScreen
 import com.geostampcamera.ui.template.TemplateSelectorScreen
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.geostampcamera.ui.camera.CameraViewModel
 
 object Routes {
     const val CAMERA = "camera"
@@ -41,12 +43,9 @@ fun GeoStampNavGraph() {
             route = Routes.PREVIEW,
             arguments = listOf(navArgument("photoPath") { type = NavType.StringType })
         ) { backStackEntry ->
-            val photoPath = java.net.URLDecoder.decode(
-                backStackEntry.arguments?.getString("photoPath") ?: "",
-                "UTF-8"
-            )
+            val viewModel: CameraViewModel = hiltViewModel()
             PhotoPreviewScreen(
-                photoPath = photoPath,
+                viewModel = viewModel,
                 onBack = { navController.popBackStack() },
                 onDone = {
                     navController.popBackStack(Routes.CAMERA, inclusive = false)

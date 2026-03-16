@@ -66,6 +66,7 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val mapKeyTest by viewModel.mapKeyTestState.collectAsStateWithLifecycle()
+    val mapplsKeyTest by viewModel.mapplsKeyTestState.collectAsStateWithLifecycle()
     val weatherKeyTest by viewModel.weatherKeyTestState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
         rememberTopAppBarState()
@@ -148,6 +149,7 @@ fun SettingsScreen(
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 4.dp, bottom = 4.dp, start = 4.dp)
             )
+            // Use a specific provider chip row that helps visibility
             SettingsChipRow(
                 options = MapProvider.entries.toList(),
                 selectedOption = settings.mapProvider,
@@ -155,53 +157,17 @@ fun SettingsScreen(
                 onSelected = { viewModel.setMapProvider(it) }
             )
 
-            if (settings.mapProvider == MapProvider.GOOGLE_MAPS) {
-                var apiKey by remember(settings.googleMapsApiKey) {
-                    mutableStateOf(settings.googleMapsApiKey)
-                }
-                androidx.compose.material3.OutlinedTextField(
-                    value = apiKey,
-                    onValueChange = {
-                        apiKey = it
-                        viewModel.setGoogleMapsApiKey(it)
-                        viewModel.clearMapKeyTestState()
-                    },
-                    label = { Text("Google Maps API Key") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+            // Added a small hint for MapmyIndia visibility
+            if (MapProvider.entries.size > 2) {
+                Text(
+                    text = "Swipe for more map providers → (MapmyIndia)",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
                 )
-                Row(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    Button(
-                        onClick = { viewModel.testGoogleMapsKey(apiKey) },
-                        enabled = apiKey.isNotBlank() && !mapKeyTest.isTesting
-                    ) {
-                        if (mapKeyTest.isTesting) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }
-                        Text("Test Key")
-                    }
-                    mapKeyTest.resultMessage?.let { msg ->
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = if (mapKeyTest.isSuccess) "Valid" else msg,
-                            color = if (mapKeyTest.isSuccess)
-                                MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
             }
+
+
 
             Text(
                 text = "Map Type",
@@ -358,53 +324,6 @@ fun SettingsScreen(
                 onSelected = { viewModel.setWeatherProvider(it) }
             )
 
-            if (settings.weatherProvider == WeatherProvider.OPENWEATHER) {
-                var weatherKey by remember(settings.openWeatherApiKey) {
-                    mutableStateOf(settings.openWeatherApiKey)
-                }
-                androidx.compose.material3.OutlinedTextField(
-                    value = weatherKey,
-                    onValueChange = {
-                        weatherKey = it
-                        viewModel.setOpenWeatherApiKey(it)
-                        viewModel.clearWeatherKeyTestState()
-                    },
-                    label = { Text("OpenWeather API Key") },
-                    singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                )
-                Row(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    Button(
-                        onClick = { viewModel.testOpenWeatherKey(weatherKey) },
-                        enabled = weatherKey.isNotBlank() && !weatherKeyTest.isTesting
-                    ) {
-                        if (weatherKeyTest.isTesting) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                        }
-                        Text("Test Key")
-                    }
-                    weatherKeyTest.resultMessage?.let { msg ->
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = if (weatherKeyTest.isSuccess) "Valid" else msg,
-                            color = if (weatherKeyTest.isSuccess)
-                                MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                }
-            }
 
             Text(
                 text = "Temperature Unit",
@@ -464,6 +383,158 @@ fun SettingsScreen(
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
+            // -- API Keys Section (always visible) --
+            SettingsSectionHeader("API Keys")
+            Text(
+                text = "Add API keys to unlock premium map and weather providers. Leave blank to use free defaults.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+            )
+
+            // Google Maps API Key
+            var gmApiKey by remember(settings.googleMapsApiKey) {
+                mutableStateOf(settings.googleMapsApiKey)
+            }
+            androidx.compose.material3.OutlinedTextField(
+                value = gmApiKey,
+                onValueChange = {
+                    gmApiKey = it
+                    viewModel.setGoogleMapsApiKey(it)
+                    viewModel.clearMapKeyTestState()
+                },
+                label = { Text("Google Maps API Key") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            )
+            Row(
+                modifier = Modifier.padding(bottom = 8.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = { viewModel.testGoogleMapsKey(gmApiKey) },
+                    enabled = gmApiKey.isNotBlank() && !mapKeyTest.isTesting
+                ) {
+                    if (mapKeyTest.isTesting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text("Test Key")
+                }
+                mapKeyTest.resultMessage?.let { msg ->
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = if (mapKeyTest.isSuccess) "✓ Valid" else msg,
+                        color = if (mapKeyTest.isSuccess)
+                            MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
+            // MapmyIndia / Mappls API Key
+            var mmApiKey by remember(settings.mapplsApiKey) {
+                mutableStateOf(settings.mapplsApiKey)
+            }
+            androidx.compose.material3.OutlinedTextField(
+                value = mmApiKey,
+                onValueChange = {
+                    mmApiKey = it
+                    viewModel.setMapplsApiKey(it)
+                    viewModel.clearMapplsKeyTestState()
+                },
+                label = { Text("MapmyIndia / Mappls API Key") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            )
+            Row(
+                modifier = Modifier.padding(bottom = 8.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = { viewModel.testMapplsKey(mmApiKey) },
+                    enabled = mmApiKey.isNotBlank() && !mapplsKeyTest.isTesting
+                ) {
+                    if (mapplsKeyTest.isTesting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text("Test Key")
+                }
+                mapplsKeyTest.resultMessage?.let { msg ->
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = if (mapplsKeyTest.isSuccess) "✓ Valid" else msg,
+                        color = if (mapplsKeyTest.isSuccess)
+                            MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
+            // OpenWeather API Key
+            var owApiKey by remember(settings.openWeatherApiKey) {
+                mutableStateOf(settings.openWeatherApiKey)
+            }
+            androidx.compose.material3.OutlinedTextField(
+                value = owApiKey,
+                onValueChange = {
+                    owApiKey = it
+                    viewModel.setOpenWeatherApiKey(it)
+                    viewModel.clearWeatherKeyTestState()
+                },
+                label = { Text("OpenWeather API Key") },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            )
+            Row(
+                modifier = Modifier.padding(bottom = 8.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = { viewModel.testOpenWeatherKey(owApiKey) },
+                    enabled = owApiKey.isNotBlank() && !weatherKeyTest.isTesting
+                ) {
+                    if (weatherKeyTest.isTesting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text("Test Key")
+                }
+                weatherKeyTest.resultMessage?.let { msg ->
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = if (weatherKeyTest.isSuccess) "✓ Valid" else msg,
+                        color = if (weatherKeyTest.isSuccess)
+                            MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
             // -- Theme Settings --
             SettingsSectionHeader("App Theme")
             SettingsChipRow(
@@ -473,7 +544,7 @@ fun SettingsScreen(
                 onSelected = { viewModel.setAppTheme(it) }
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

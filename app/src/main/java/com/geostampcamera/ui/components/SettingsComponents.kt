@@ -3,6 +3,7 @@ package com.geostampcamera.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +38,7 @@ fun SettingsSectionHeader(title: String) {
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.SemiBold,
-        modifier = Modifier.padding(top = 24.dp, bottom = 8.dp, start = 4.dp)
+        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp, start = 4.dp)
     )
 }
 
@@ -64,7 +66,7 @@ fun SettingsToggleRow(
     }
 }
 
-// Single-selection chip row for enum options
+// Single-selection chip row for enum options (horizontally scrollable)
 @Composable
 fun <T> SettingsChipRow(
     options: List<T>,
@@ -75,7 +77,8 @@ fun <T> SettingsChipRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .horizontalScroll(rememberScrollState())
+            .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         options.forEach { option ->

@@ -55,6 +55,9 @@ class SettingsViewModel @Inject constructor(
     private val _mapKeyTestState = MutableStateFlow(ApiKeyTestState())
     val mapKeyTestState: StateFlow<ApiKeyTestState> = _mapKeyTestState.asStateFlow()
 
+    private val _mapplsKeyTestState = MutableStateFlow(ApiKeyTestState())
+    val mapplsKeyTestState: StateFlow<ApiKeyTestState> = _mapplsKeyTestState.asStateFlow()
+
     // Validate OpenWeather API key
     fun testOpenWeatherKey(apiKey: String) {
         viewModelScope.launch {
@@ -87,6 +90,22 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    // Validate MapmyIndia / Mappls API key
+    fun testMapplsKey(apiKey: String) {
+        viewModelScope.launch {
+            _mapplsKeyTestState.value = ApiKeyTestState(isTesting = true)
+            val result = mapSnapshotGenerator.validateMapplsKey(apiKey)
+            _mapplsKeyTestState.value = when (result) {
+                is MapKeyValidationResult.Valid -> ApiKeyTestState(
+                    isTesting = false, resultMessage = "API key is valid", isSuccess = true
+                )
+                is MapKeyValidationResult.Invalid -> ApiKeyTestState(
+                    isTesting = false, resultMessage = result.reason, isSuccess = false
+                )
+            }
+        }
+    }
+
     // Clear test states
     fun clearWeatherKeyTestState() {
         _weatherKeyTestState.value = ApiKeyTestState()
@@ -94,6 +113,10 @@ class SettingsViewModel @Inject constructor(
 
     fun clearMapKeyTestState() {
         _mapKeyTestState.value = ApiKeyTestState()
+    }
+
+    fun clearMapplsKeyTestState() {
+        _mapplsKeyTestState.value = ApiKeyTestState()
     }
 
     // -- Stamp content --
@@ -117,6 +140,7 @@ class SettingsViewModel @Inject constructor(
     fun setMapType(v: MapType) = launch { repository.setMapType(v) }
     fun setMapSize(v: MapSize) = launch { repository.setMapSize(v) }
     fun setGoogleMapsApiKey(v: String) = launch { repository.setGoogleMapsApiKey(v) }
+    fun setMapplsApiKey(v: String) = launch { repository.setMapplsApiKey(v) }
 
     // -- Text style --
     fun setFontSize(v: FontSize) = launch { repository.setFontSize(v) }

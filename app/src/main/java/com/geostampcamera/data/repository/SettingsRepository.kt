@@ -80,6 +80,9 @@ class SettingsRepository @Inject constructor(
     suspend fun setGoogleMapsApiKey(value: String) =
         dataStoreManager.updateString(DataStoreManager.Keys.GOOGLE_MAPS_API_KEY, value)
 
+    suspend fun setMapplsApiKey(value: String) =
+        dataStoreManager.updateString(DataStoreManager.Keys.MAPPLS_API_KEY, value)
+
     // -- Text style --
 
     suspend fun setFontSize(value: FontSize) =
