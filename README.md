@@ -114,12 +114,14 @@ GeoStamp Camera supports **both free and paid** data providers. You can choose y
 When you go to the developer consoles, you will see many options. **Enable ONLY these** to avoid unnecessary costs and confusion:
 
 **1. Google Cloud Console:**
-- Search for "Maps Static API" and enable it.
+- Search for **"Maps Static API"** and enable it.
 - (Optional but recommended) Enable "Maps SDK for Android".
 
 **2. Mappls (MapmyIndia) Console:**
-- Search for "Still Image API" or find it under "Raster API" section.
-- This is required for the static snapshots shown on the stamp.
+- Go to the **Mappls API Console**.
+- Select your project → **API Access** (left sidebar) → **API & SDKs**.
+- Look for the category **"REST APIs"** or **"Map & Traffic APIs"**.
+- Find and enable **"Still Map Image API"** (this is the one needed for technical stamps).
 
 **3. OpenWeather Console:**
 - Use the **"Current Weather Data"** API.
